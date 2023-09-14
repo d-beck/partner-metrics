@@ -29,6 +29,14 @@ class User < ActiveRecord::Base
     metrics.minimum("metric_date")
   end
 
+  def calculate_from_date
+    @calculate_from_date ||= newest_metric_date.presence || PaymentHistory.default_start_date
+  end
+
+  def clear_old_payments
+    payment_histories.where("payment_date > ?", calculate_from_date).delete_all
+  end
+
   # TODO: DRY the following methods up
 
   def yearly_revenue_per_product(date:, charge_type: nil)
